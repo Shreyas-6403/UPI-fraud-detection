@@ -66,3 +66,15 @@ if st.button("Predict Fraud"):
     result = predict_fraud(sender_upi, receiver_upi, amount, hour, status)
     if result != "Error":
         st.write(f"### Prediction: {result}")
+
+ # 🚨 Fraud Prevention Tips
+        st.markdown("### 🛡️ How to Avoid Fraud Transactions:")
+        st.markdown("""
+        - **🔒 Never share your UPI PIN** with anyone.
+        - **🚫 Avoid clicking on unknown links** asking for payments.
+        - **🧐 Double-check the receiver's UPI ID** before sending money.
+        - **⚠️ Be cautious of offers that sound too good to be true.**
+        - **📞 If in doubt, contact your bank directly** instead of calling unknown numbers.
+        - **🛑 Don't approve 'Request Money' transactions** unless you trust the sender.
+        - **✅ Use trusted apps** and keep them updated for security fixes.
+        """)
