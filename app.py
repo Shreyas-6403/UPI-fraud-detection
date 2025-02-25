@@ -14,7 +14,7 @@ if not isinstance(encoders, dict):
     st.stop()
 
 
-st.image("image.jpg", caption="Uploaded Image", use_column_width=True)
+st.image("image.jpg", use_column_width=True)
 
 # Debugging - Show available encoders
 #st.write("✅ Available Encoders:", list(encoders.keys()))
