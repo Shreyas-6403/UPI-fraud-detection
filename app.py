@@ -43,7 +43,7 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
     feature_7 = 0
     
     # Ensure input matches model's expected features
-    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded, feature_6, feature_7]]
+    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded, feature_6, feature_7]])
 
     if input_data.shape[1] != model.n_features_in_:
         st.error(f"⚠️ Feature mismatch! Model expects {model.n_features_in_} features but received {input_data.shape[1]}.")
