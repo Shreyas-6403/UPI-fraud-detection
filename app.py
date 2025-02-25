@@ -50,7 +50,7 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
         return "Error"
 
     prediction = model.predict(input_data)[0]
-    return "Fraudulent" if prediction == 1 else "Legitimate"
+    return "Fraud" if prediction == 1 else "Legit"
 
 # Streamlit UI
 st.title("UPI Fraud Detection System")
