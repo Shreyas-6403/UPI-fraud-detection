@@ -1,78 +1,63 @@
-from flask import Flask, request, jsonify, render_template
+import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
-from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
-
-# Paths to model and encoder files
+# Load the trained model
 MODEL_PATH = "fraud_detection_model.pkl"
 ENCODER_PATH = "label_encoders.pkl"
 
-# Load Model and Encoders
+# Load model and encoders
+@st.cache_resource
 def load_model_and_encoders():
     try:
         model = joblib.load(MODEL_PATH)
-        encoders = joblib.load(ENCODER_PATH)  # Load label encoders
-        print("✅ Model and Encoders loaded successfully.")
+        encoders = joblib.load(ENCODER_PATH)
         return model, encoders
     except FileNotFoundError:
-        print("⚠ Model or encoders not found! Train the model first.")
+        st.error("Model or encoders not found! Please train the model first.")
         return None, None
 
 model, encoders = load_model_and_encoders()
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# Streamlit UI
+st.title("UPI Fraud Detection")
 
-# Prediction API
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.get_json()
+# Input Fields
+transaction_id = st.text_input("Transaction ID")
+timestamp = st.text_input("Timestamp")
+sender_name = st.text_input("Sender Name")
+sender_upi = st.text_input("Sender UPI ID")
+receiver_name = st.text_input("Receiver Name")
+receiver_upi = st.text_input("Receiver UPI ID")
+amount = st.number_input("Transaction Amount (INR)", min_value=0.01)
+status = st.selectbox("Transaction Status", ["Success", "Failed"])
 
-        # Required fields
-        required_fields = ["amount", "status", "transaction_id", "timestamp", "sender_name", "sender_upi", "receiver_name", "receiver_upi"]
-        missing_fields = [field for field in required_fields if field not in data]
+if st.button("Detect Fraud"):
+    if model is None:
+        st.error("Model is not loaded. Please train it first.")
+    else:
+        # Convert status to binary
+        status_encoded = 1 if status == "Success" else 0
         
-        if missing_fields:
-            return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
+        # Encode sender/receiver UPI
+        try:
+            sender_upi_encoded = encoders["sender_upi"].transform([sender_upi])[0]
+            receiver_upi_encoded = encoders["receiver_upi"].transform([receiver_upi])[0]
+        except KeyError:
+            st.warning("New UPI ID detected. Using raw value.")
+            sender_upi_encoded = sender_upi
+            receiver_upi_encoded = receiver_upi
         
-        # Convert amount to float safely
-        amount = float(data["amount"])
-        
-        # Convert status to binary (1 = Success, 0 = Failed)
-        status = 1 if data["status"].strip().lower() == "success" else 0
-
-        # Apply Label Encoders to categorical fields
-        sender_upi = encoders["sender_upi"].transform([data["sender_upi"]])[0] if "sender_upi" in encoders else data["sender_upi"]
-        receiver_upi = encoders["receiver_upi"].transform([data["receiver_upi"]])[0] if "receiver_upi" in encoders else data["receiver_upi"]
-
-        # Prepare input data
+        # Prepare input
         input_data = pd.DataFrame([{
             "Amount (INR)": amount,
-            "Status": status,
-            "Sender UPI": sender_upi,
-            "Receiver UPI": receiver_upi
+            "Status": status_encoded,
+            "Sender UPI": sender_upi_encoded,
+            "Receiver UPI": receiver_upi_encoded
         }])
-        
-        # Ensure model is loaded
-        if model is None:
-            return jsonify({"error": "Model not loaded. Train the model first."}), 500
         
         # Make prediction
         prediction = model.predict(input_data)[0]
-        result = "Fraudulent Transaction" if prediction == 1 else "Legitimate Transaction"
-
-        return jsonify({"prediction": result})
-    
-    except ValueError as ve:
-        return jsonify({"error": f"Invalid data format: {str(ve)}"}), 400
-    except Exception as e:
-        return jsonify({"error": f"Server Error: {str(e)}"}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        result = "⚠ Fraudulent Transaction!" if prediction == 1 else "✅ Legitimate Transaction"
+        
+        st.success(result)
