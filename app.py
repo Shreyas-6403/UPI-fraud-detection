@@ -39,7 +39,7 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, fea
     feature_7_encoded = encode_feature("feature_7", feature_7)
 
     # Ensure input matches model's expected features
-    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded, feature_6_encoded, feature_7_encoded]])
+    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded]])
 
     if input_data.shape[1] != model.n_features_in_:
         st.error(f"⚠️ Feature mismatch! Model expects {model.n_features_in_} features but received {input_data.shape[1]}.")
@@ -66,6 +66,6 @@ status_options = encoders["status"].classes_ if "status" in encoders else ["Pend
 status = st.selectbox("Transaction Status", options=status_options)
 
 if st.button("Predict Fraud"):
-    result = predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, feature_7)
+    result = predict_fraud(sender_upi, receiver_upi, amount, hour, status)
     if result != "Error":
         st.write(f"### Prediction: {result}")
