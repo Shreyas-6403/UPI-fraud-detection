@@ -60,7 +60,7 @@ st.title("UPI Fraud Detection System")
 
 sender_upi = st.text_input("Sender UPI ID")
 receiver_upi = st.text_input("Receiver UPI ID")
-amount = st.number_input("Transaction Amount (INR)", min_value=0.01)
+amount = st.number_input("Transaction Amount (INR)", min_value=1)
 hour = st.number_input("Transaction Hour (0-23)", min_value=0, max_value=23)
 status_options = encoders["status"].classes_ if "status" in encoders else ["Pending", "Completed", "Failed"]
 status = st.selectbox("Transaction Status", options=status_options)
