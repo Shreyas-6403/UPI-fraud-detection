@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UPI Fraud Detection</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #0d1117;
+        color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #161b22;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        width: 400px;
+        text-align: center;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      input,
+      select {
+        background-color: #21262d;
+        color: #fff;
+      }
+      button {
+        background-color: #ff914d;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+      button:hover {
+        background-color: #ff751a;
+      }
+      .result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #ffcc00;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>UPI Fraud Detection</h2>
+      <form id="fraudForm">
+        <input
+          type="text"
+          id="transaction_id"
+          placeholder="Transaction ID"
+          required
+        />
+        <input type="datetime-local" id="timestamp" required />
+        <input
+          type="text"
+          id="sender_name"
+          placeholder="Sender Name"
+          required
+        />
+        <input
+          type="text"
+          id="sender_upi"
+          placeholder="Sender UPI ID"
+          required
+        />
+        <input
+          type="text"
+          id="receiver_name"
+          placeholder="Receiver Name"
+          required
+        />
+        <input
+          type="text"
+          id="receiver_upi"
+          placeholder="Receiver UPI ID"
+          required
+        />
+        <input type="number" id="amount" placeholder="Amount (INR)" required />
+        <select id="status" required>
+          <option value="">Select Status</option>
+          <option value="Success">Success</option>
+          <option value="Failed">Failed</option>
+        </select>
+        <button type="button" onclick="detectFraud()">Submit</button>
+      </form>
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+      async function detectFraud() {
+        const formData = {
+          transaction_id: document.getElementById("transaction_id").value,
+          timestamp: document.getElementById("timestamp").value,
+          sender_name: document.getElementById("sender_name").value,
+          sender_upi: document.getElementById("sender_upi").value,
+          receiver_name: document.getElementById("receiver_name").value,
+          receiver_upi: document.getElementById("receiver_upi").value,
+          amount: parseFloat(document.getElementById("amount").value), // Convert to float
+          status: document.getElementById("status").value,
+        };
+
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server Error: ${response.status}`);
+          }
+
+          const result = await response.json();
+          document.getElementById("result").innerText =
+            result.prediction || result.error;
+        } catch (error) {
+          document.getElementById(
+            "result"
+          ).innerText = `Error: ${error.message}`;
+        }
+      }
+    </script>
+  </body>
+</html>
