@@ -13,21 +13,20 @@ def encode_category(encoder, value):
     return encoder.transform([value])[0] if value in encoder.classes_ else -1  # Handle unseen values
 
 # Prediction function
-def predict_fraud(sender_upi, receiver_upi, amount, hour, day, month, status):
-    # Encode categorical inputs safely
-    sender_upi_encoded = encode_category(encoders.get("sender_upi"), sender_upi)
-    receiver_upi_encoded = encode_category(encoders.get("receiver_upi"), receiver_upi)
-    status_encoded = encode_category(encoders.get("status"), status)
+def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
+    """Predict fraud using the correct 5 feature input format."""
+    sender_upi_encoded = encoders["sender_upi"].transform([sender_upi])[0]
+    receiver_upi_encoded = encoders["receiver_upi"].transform([receiver_upi])[0]
+    status_encoded = encoders["status"].transform([status])[0]
 
-    # Ensure input matches model feature count
-    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, day, month, status_encoded]], dtype=np.float64)
+    # ⚠️ Only 5 features! (Removing day & month)
+    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded]])
 
-    # Check shape before prediction
+    # ✅ Fix: Ensure feature count matches the model's requirement
     if input_data.shape[1] != model.n_features_in_:
         st.error(f"Feature mismatch! Model expects {model.n_features_in_} features but received {input_data.shape[1]}.")
         return "Error"
 
-    # Predict
     prediction = model.predict(input_data)[0]
     return "Fraudulent" if prediction == 1 else "Legitimate"
 
@@ -38,10 +37,15 @@ sender_upi = st.text_input("Sender UPI ID")
 receiver_upi = st.text_input("Receiver UPI ID")
 amount = st.number_input("Transaction Amount (INR)", min_value=0.01)
 hour = st.number_input("Transaction Hour (0-23)", min_value=0, max_value=23)
-day = st.number_input("Transaction Day (1-31)", min_value=1, max_value=31)
-month = st.number_input("Transaction Month (1-12)", min_value=1, max_value=12)
+
+# Status Dropdown
 status_options = encoders["status"].classes_ if "status" in encoders else ["Pending", "Completed", "Failed"]
 status = st.selectbox("Transaction Status", options=status_options)
+
+if st.button("Predict Fraud"):
+    result = predict_fraud(sender_upi, receiver_upi, amount, hour, status)
+    if result != "Error":
+        st.write(f"### Prediction: {result}")
 
 if st.button("Predict Fraud"):
     result = predict_fraud(sender_upi, receiver_upi, amount, hour, day, month, status)
