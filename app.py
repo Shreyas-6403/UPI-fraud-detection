@@ -45,6 +45,9 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
     prediction = model.predict(input_data)[0]
     return "Fraudulent" if prediction == 1 else "Legitimate"
 
+#Image
+st.image("image.jpg", caption="Uploaded Image", use_column_width=True)
+
 # Streamlit UI
 st.title("UPI Fraud Detection System")
 
