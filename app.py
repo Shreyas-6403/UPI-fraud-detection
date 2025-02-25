@@ -19,10 +19,15 @@ st.write("✅ Available Encoders:", list(encoders.keys()))
 # Function to safely encode categorical features
 def encode_feature(feature_name, value):
     if feature_name in encoders:
-        return encoders[feature_name].transform([value])[0] if value in encoders[feature_name].classes_ else -1
+        encoder = encoders[feature_name]
+        if value in encoder.classes_:
+            return encoder.transform([value])[0]
+        else:
+            st.warning(f"⚠️ '{value}' not found in '{feature_name}' encoder! Assigning default.")
+            return -1  # Default unknown label
     else:
         st.warning(f"⚠️ Encoder for '{feature_name}' is missing! Using default encoding.")
-        return -1  # Default encoding
+        return -1
 
 # Prediction Function
 def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
