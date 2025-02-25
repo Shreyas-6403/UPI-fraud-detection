@@ -1,6 +1,7 @@
 import joblib
 import streamlit as st
 import numpy as np
+from PIL import Image
 
 # Load the trained model
 model = joblib.load("fraud_detection_model.pkl")
@@ -45,8 +46,12 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
     prediction = model.predict(input_data)[0]
     return "Fraudulent" if prediction == 1 else "Legitimate"
 
-#Image
-st.image("image.jpg", caption="Uploaded Image", use_column_width=500)
+
+# Load the image
+image = Image.open("image.jpg")
+
+# Display the image with the correct parameter
+st.image(image, caption="Uploaded Image", use_container_width=True)
 
 # Streamlit UI
 st.title("UPI Fraud Detection System")
