@@ -1,6 +1,7 @@
 import joblib
 import streamlit as st
 import numpy as np
+from PIL import Image
 
 # Load the trained model
 model = joblib.load("fraud_detection_model.pkl")
@@ -13,8 +14,11 @@ if not isinstance(encoders, dict):
     st.error("❌ `label_encoders.pkl` is not a dictionary! Re-save it using the training script.")
     st.stop()
 
+# Load the image
+image = Image.open("image.jpg")
 
-st.image("image.jpg", use_column_width=True)
+# Display the image with the correct parameter
+st.image(image, caption="Uploaded Image", use_container_width=True)
 
 # Debugging - Show available encoders
 #st.write("✅ Available Encoders:", list(encoders.keys()))
