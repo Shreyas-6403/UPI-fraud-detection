@@ -31,20 +31,22 @@ def encode_feature(feature_name, value):
         return -1
 
 # Prediction Function
-def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
+def predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, feature_7):
     sender_upi_encoded = encode_feature("sender_upi", sender_upi)
     receiver_upi_encoded = encode_feature("receiver_upi", receiver_upi)
     status_encoded = encode_feature("status", status)
+    feature_6_encoded = encode_feature("feature_6", feature_6)
+    feature_7_encoded = encode_feature("feature_7", feature_7)
 
     # Ensure input matches model's expected features
-    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded]])
+    input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded, feature_6_encoded, feature_7_encoded]])
 
     if input_data.shape[1] != model.n_features_in_:
         st.error(f"⚠️ Feature mismatch! Model expects {model.n_features_in_} features but received {input_data.shape[1]}.")
         return "Error"
 
     prediction = model.predict(input_data)[0]
-    return "Fraudulent" if prediction == 1 else "Legitimate"
+    return "Fraud" if prediction == 1 else "Legit"
 
 
 # Load the image
