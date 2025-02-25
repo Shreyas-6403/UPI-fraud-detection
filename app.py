@@ -1,7 +1,6 @@
 import joblib
 import streamlit as st
 import numpy as np
-from PIL import Image
 
 # Load the trained model
 model = joblib.load("fraud_detection_model.pkl")
@@ -14,29 +13,25 @@ if not isinstance(encoders, dict):
     st.error("❌ `label_encoders.pkl` is not a dictionary! Re-save it using the training script.")
     st.stop()
 
+
+st.image("image.jpg", caption="Uploaded Image", use_column_width=True)
+
 # Debugging - Show available encoders
-#st.write("✅ Available Encoders:", list(encoders.keys()))
+st.write("✅ Available Encoders:", list(encoders.keys()))
 
 # Function to safely encode categorical features
 def encode_feature(feature_name, value):
     if feature_name in encoders:
-        encoder = encoders[feature_name]
-        if value in encoder.classes_:
-            return encoder.transform([value])[0]
-        else:
-            st.warning(f"⚠️ '{value}' not found in '{feature_name}' encoder! Assigning default.")
-            return -1  # Default unknown label
+        return encoders[feature_name].transform([value])[0] if value in encoders[feature_name].classes_ else -1
     else:
         st.warning(f"⚠️ Encoder for '{feature_name}' is missing! Using default encoding.")
-        return -1
+        return -1  # Default encoding
 
 # Prediction Function
-def predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, feature_7):
+def predict_fraud(sender_upi, receiver_upi, amount, hour, status):
     sender_upi_encoded = encode_feature("sender_upi", sender_upi)
     receiver_upi_encoded = encode_feature("receiver_upi", receiver_upi)
     status_encoded = encode_feature("status", status)
-    feature_6_encoded = encode_feature("feature_6", feature_6)
-    feature_7_encoded = encode_feature("feature_7", feature_7)
 
     # Ensure input matches model's expected features
     input_data = np.array([[sender_upi_encoded, receiver_upi_encoded, amount, hour, status_encoded]])
@@ -46,21 +41,14 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, fea
         return "Error"
 
     prediction = model.predict(input_data)[0]
-    return "Fraud" if prediction == 1 else "Legit"
-
-
-# Load the image
-image = Image.open("image.jpg")
-
-# Display the image with the correct parameter
-st.image(image, use_container_width=True)
+    return "Fraudulent" if prediction == 1 else "Legitimate"
 
 # Streamlit UI
 st.title("UPI Fraud Detection System")
 
 sender_upi = st.text_input("Sender UPI ID")
 receiver_upi = st.text_input("Receiver UPI ID")
-amount = st.number_input("Transaction Amount (INR)", min_value=1)
+amount = st.number_input("Transaction Amount (INR)", min_value=0.01)
 hour = st.number_input("Transaction Hour (0-23)", min_value=0, max_value=23)
 status_options = encoders["status"].classes_ if "status" in encoders else ["Pending", "Completed", "Failed"]
 status = st.selectbox("Transaction Status", options=status_options)
