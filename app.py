@@ -66,6 +66,6 @@ status_options = encoders["status"].classes_ if "status" in encoders else ["Pend
 status = st.selectbox("Transaction Status", options=status_options)
 
 if st.button("Predict Fraud"):
-    result = predict_fraud(sender_upi, receiver_upi, amount, hour, status)
+    result = predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, feature_7)
     if result != "Error":
         st.write(f"### Prediction: {result}")
