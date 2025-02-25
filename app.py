@@ -17,7 +17,7 @@ if not isinstance(encoders, dict):
 st.image("image.jpg", caption="Uploaded Image", use_column_width=True)
 
 # Debugging - Show available encoders
-st.write("✅ Available Encoders:", list(encoders.keys()))
+#st.write("✅ Available Encoders:", list(encoders.keys()))
 
 # Function to safely encode categorical features
 def encode_feature(feature_name, value):
