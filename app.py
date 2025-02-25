@@ -53,7 +53,7 @@ def predict_fraud(sender_upi, receiver_upi, amount, hour, status, feature_6, fea
 image = Image.open("image.jpg")
 
 # Display the image with the correct parameter
-st.image(image, caption="Uploaded Image", use_container_width=True)
+st.image(image, use_container_width=True)
 
 # Streamlit UI
 st.title("UPI Fraud Detection System")
